@@ -1,6 +1,21 @@
+#include <cmath>
+
 #include "Renderer.h"
 
 #include "Walnut/Random.h"
+
+namespace Utils 
+{
+	static uint32_t ConvertToRGBA(const glm::vec4& color)
+	{
+		uint8_t r = (uint8_t)(color.r * 255.0f);
+		uint8_t g = (uint8_t)(color.g * 255.0f);
+		uint8_t b = (uint8_t)(color.b * 255.0f);
+		uint8_t a = (uint8_t)(color.a * 255.0f);
+
+		return (a << 24) | (b << 16) | (g << 8) | r;
+	}
+}
 
 void Renderer::OnResize(uint32_t width, uint32_t height)
 {
@@ -33,7 +48,8 @@ void Renderer::Render()
 			// assign pixel value accordingly
 			glm::vec2 coord = { (float)x / (float)m_FinalImage->GetWidth(), (float)y / (float)m_FinalImage->GetHeight() };
 			coord = coord * 2.0f - 1.0f; // normalize between [-1, 1] and not [0, 1]
-			m_ImageData[x + y * m_FinalImage->GetWidth()] = PerPixel(coord);
+			glm::vec4 color = PerPixel(coord);
+			m_ImageData[x + y * m_FinalImage->GetWidth()] = Utils::ConvertToRGBA(color);
 		}
 	}
 
@@ -41,14 +57,14 @@ void Renderer::Render()
 }
 
 // Assign colour to each pixel based on its coordinates in the image
-uint32_t Renderer::PerPixel(glm::vec2 coord)
+glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 {
 	// we have a sphere centered at the origin with radius 0.5f
 	// and the camera is located at (0, 0, 2) facing the sphere
 	float radius = 0.5f;
 	glm::vec3 rayOrigin(0.0f, 0.0f, 2.0f);
 	glm::vec3 rayDir(coord.x, coord.y, -1.0f);
-	// rayDir = glm::normalize(rayDir) // make it a unit vector
+	// rayDir = glm::normalize(rayDir); // make it a unit vector
 
 	// (bx^2 + by^2 + bz^2) * t^2 + 2*t*(ax*bx + ay*by + az*bz) + (ax^2 + ay^2 + az^2 - r^2) = 0
 	// a = ray origin
@@ -66,8 +82,23 @@ uint32_t Renderer::PerPixel(glm::vec2 coord)
 	// discriminant = b^2 - 4*a*c
 	float disc = b * b - 4 * a * c;
 
-	if (disc >= 0)
-		return 0xffff00ff;
+	if (disc > 0)
+	{
+		float z = (-b + sqrt(disc)) / (2.0f * a);
+		float closestZ = (-b - sqrt(disc)) / (2.0f * a);
+		
+		glm::vec3 hitPoint = rayOrigin + rayDir * closestZ;
+		glm::vec3 normal = glm::normalize(hitPoint);
 
-	return 0xff000000;
+		glm::vec3 sphereCol(1, 0, 1);
+
+		glm::vec3 lightDir(-1.0f, -1.0f, -1.0f);
+		lightDir = glm::normalize(lightDir);
+		float lightMult = glm::max(glm::dot(normal, -lightDir), 0.0f);
+
+		sphereCol *= lightMult;
+		return glm::vec4(sphereCol, 1.0f);
+	}
+
+	return glm::vec4(0, 0, 0, 1);
 }
