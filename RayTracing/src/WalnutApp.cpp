@@ -25,8 +25,8 @@ public:
 
 		{
 			Sphere sphere;
-			sphere.Position = { 1.0f, 0.0f, -5.0f };
-			sphere.Radius = 1.5f;
+			sphere.Position = { 0.0f, -9.20f, 0.0f };
+			sphere.Radius = 8.6f;
 			sphere.Albedo = { 0.2f, 0.3f, 1.0f };
 			m_Scene.Spheres.push_back(sphere);
 		}
