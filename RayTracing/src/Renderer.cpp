@@ -69,32 +69,36 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 
 	float multiplier = 1.0f;
 	
+	// bounce the light across surfaces n number of times
+	// reduce the intensity of light by a multiplier per bounce
 	int bounces = 2;
 	for (int i = 0; i < bounces; i++)
 	{
 		Renderer::HitPayload payload = TraceRay(ray);
 		if (payload.HitDistance < 0)
 		{
-			glm::vec3 skyColor = glm::vec3(0.0f, 0.0f, 0.0f);
+			glm::vec3 skyColor = glm::vec3(0.6f, 0.7f, 0.9f);
 			color += skyColor * multiplier;
 			break;
 		}
 
+		// add shading on the surface as per the angle of the light source
 		glm::vec3 lightDir(-1.0f, -1.0f, -1.0f);
 		lightDir = glm::normalize(lightDir);
 		float lightMult = glm::max(glm::dot(payload.WorldNormal, -lightDir), 0.0f);
 
 		const Sphere& closestSphere = m_ActiveScene->Spheres[payload.ObjectIndex];
-		glm::vec3 sphereCol = closestSphere.Albedo;
+		const Material& closestMaterial = m_ActiveScene->Materials[closestSphere.MaterialIndex];
+		glm::vec3 sphereCol = closestMaterial.Albedo;
 		sphereCol *= lightMult;
 		color += sphereCol * multiplier;
 
-		multiplier *= 0.7f;
+		multiplier *= 0.5f;
 
 		// added a little bias of 0.0001 so that the reflection image
 		// on the sphere surface does not clip with the sphere itself
 		ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
-		ray.Direction = glm::reflect(ray.Direction, payload.WorldNormal);
+		ray.Direction = glm::reflect(ray.Direction, payload.WorldNormal + closestMaterial.Roughness * Walnut::Random::Vec3(-0.5f, 0.5f));
 	}
 
 	return glm::vec4(color, 1.0f);
