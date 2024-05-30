@@ -1,4 +1,5 @@
 #include <cmath>
+#include <execution>
 
 #include "Renderer.h"
 
@@ -35,6 +36,14 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 
 	delete[] m_AccumulationData;
 	m_AccumulationData = new glm::vec4[width * height];
+
+	m_ImageHorizontalIter.resize(width);
+	m_ImageVerticalIter.resize(height);
+
+	for (uint32_t i = 0; i < width; i++)
+		m_ImageHorizontalIter[i] = i;
+	for (uint32_t i = 0; i < height; i++)
+		m_ImageVerticalIter[i] = i;
 }
 
 void Renderer::Render(const Scene& scene, const Camera& camera)
@@ -48,12 +57,40 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 	// if frame index is 1, completely reset the buffer to 0
 	if (m_FrameIndex == 1)
 		memset(m_AccumulationData, 0, m_FinalImage->GetWidth() * m_FinalImage->GetHeight() * sizeof(glm::vec4));
-	
+
 	// accumulatedColor accumulates all the light bounce data for 
 	// n number of frames, and then normalizes that color to get an
 	// average bounce light, in order to prevent the noise created from 
 	// generating a random bounce angle for the ray in every frame.
 	// in other words, this is path tracing.
+
+	// also there are two different methods for rendering written below
+	// the first one uses multithreading while the second one does not
+	// this is to analyse the difference in performance with/without
+	// the use of multithreading
+	// std::execution::par means 'parallel', this is an execution policy
+	// that tells the program to run the iteration parallelly.
+
+#define MT 1
+#if MT
+	std::for_each(std::execution::par, m_ImageVerticalIter.begin(), m_ImageVerticalIter.end(),
+		[this](uint32_t y) 
+		{
+			std::for_each(std::execution::par, m_ImageHorizontalIter.begin(), m_ImageHorizontalIter.end(),
+			[this, y](uint32_t x)
+				{
+					glm::vec4 color = PerPixel(x, y);
+					m_AccumulationData[x + y * m_FinalImage->GetWidth()] += color;
+
+					glm::vec4 accumulatedColor = m_AccumulationData[x + y * m_FinalImage->GetWidth()];
+					accumulatedColor /= (float)m_FrameIndex;
+
+					accumulatedColor = glm::clamp(accumulatedColor, glm::vec4(0.0f), glm::vec4(1.0f));
+					m_ImageData[x + y * m_FinalImage->GetWidth()] = Utils::ConvertToRGBA(accumulatedColor);
+				});	
+		});
+	
+#else
 	for (uint32_t y = 0; y < imgHeight; y++)
 	{
 		for (uint32_t x = 0; x < imgWidth; x++)
@@ -68,6 +105,7 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 			m_ImageData[x + y * m_FinalImage->GetWidth()] = Utils::ConvertToRGBA(accumulatedColor);
 		}
 	}
+#endif
 
 	m_FinalImage->SetData(m_ImageData);
 
