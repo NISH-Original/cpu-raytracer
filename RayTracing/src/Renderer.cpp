@@ -32,6 +32,9 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 
 	delete[] m_ImageData;
 	m_ImageData = new uint32_t[width * height];
+
+	delete[] m_AccumulationData;
+	m_AccumulationData = new glm::vec4[width * height];
 }
 
 void Renderer::Render(const Scene& scene, const Camera& camera)
@@ -42,19 +45,36 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 	uint32_t imgWidth = m_FinalImage->GetWidth();
 	uint32_t imgHeight = m_FinalImage->GetHeight();
 	
+	// if frame index is 1, completely reset the buffer to 0
+	if (m_FrameIndex == 1)
+		memset(m_AccumulationData, 0, m_FinalImage->GetWidth() * m_FinalImage->GetHeight() * sizeof(glm::vec4));
+	
+	// accumulatedColor accumulates all the light bounce data for 
+	// n number of frames, and then normalizes that color to get an
+	// average bounce light, in order to prevent the noise created from 
+	// generating a random bounce angle for the ray in every frame.
+	// in other words, this is path tracing.
 	for (uint32_t y = 0; y < imgHeight; y++)
 	{
-		const glm::vec3& rayOrigin = camera.GetPosition();
-		
 		for (uint32_t x = 0; x < imgWidth; x++)
 		{
 			glm::vec4 color = PerPixel(x, y);
-			color = glm::clamp(color, glm::vec4(0.0f), glm::vec4(1.0f));
-			m_ImageData[x + y * m_FinalImage->GetWidth()] = Utils::ConvertToRGBA(color);
+			m_AccumulationData[x + y * m_FinalImage->GetWidth()] += color;
+
+			glm::vec4 accumulatedColor = m_AccumulationData[x + y * m_FinalImage->GetWidth()];
+			accumulatedColor /= (float)m_FrameIndex;
+
+			accumulatedColor = glm::clamp(accumulatedColor, glm::vec4(0.0f), glm::vec4(1.0f));
+			m_ImageData[x + y * m_FinalImage->GetWidth()] = Utils::ConvertToRGBA(accumulatedColor);
 		}
 	}
 
 	m_FinalImage->SetData(m_ImageData);
+
+	if (m_Settings.Accumulate)
+		m_FrameIndex++;
+	else
+		m_FrameIndex = 1;
 }
 
 // function that runs for each pixel
@@ -98,7 +118,8 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 		// added a little bias of 0.0001 so that the reflection image
 		// on the sphere surface does not clip with the sphere itself
 		ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
-		ray.Direction = glm::reflect(ray.Direction, payload.WorldNormal + closestMaterial.Roughness * Walnut::Random::Vec3(-0.5f, 0.5f));
+		ray.Direction = glm::reflect(ray.Direction, 
+			payload.WorldNormal + closestMaterial.Roughness * Walnut::Random::Vec3(-0.5f, 0.5f));
 	}
 
 	return glm::vec4(color, 1.0f);
