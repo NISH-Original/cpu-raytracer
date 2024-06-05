@@ -16,6 +16,27 @@ namespace Utils
 
 		return (a << 24) | (b << 16) | (g << 8) | r;
 	}
+
+	static uint32_t PCG_Hash(uint32_t input)
+	{
+		uint32_t state = input * 747796405u + 2891336453u;
+		uint32_t word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+		return (word >> 22u) ^ word;
+	}
+
+	static float RandomFloat(uint32_t& seed)
+	{
+		seed = PCG_Hash(seed);
+		return (float)seed / (float)std::numeric_limits<uint32_t>::max();
+	}
+
+	static glm::vec3 InUnitSphere(uint32_t& seed)
+	{
+		return glm::normalize(glm::vec3(
+			RandomFloat(seed) * 2.0f - 1.0f, 
+			RandomFloat(seed) * 2.0f - 1.0f, 
+			RandomFloat(seed) * 2.0f - 1.0f));
+	}
 }
 
 void Renderer::OnResize(uint32_t width, uint32_t height)
@@ -89,7 +110,7 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 					m_ImageData[x + y * m_FinalImage->GetWidth()] = Utils::ConvertToRGBA(accumulatedColor);
 				});	
 		});
-	
+	 
 #else
 	for (uint32_t y = 0; y < imgHeight; y++)
 	{
@@ -123,44 +144,45 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 	ray.Origin = m_ActiveCamera->GetPosition();
 	ray.Direction = m_ActiveCamera->GetRayDirections()[x + y * m_FinalImage->GetWidth()];
 
-	glm::vec3 color(0.0f);
+	glm::vec3 light(0.0f);
+	glm::vec3 contribution(1.0f);
 
-	float multiplier = 1.0f;
+	uint32_t seed = x + y * m_FinalImage->GetWidth();
+	seed *= m_FrameIndex;
 	
 	// bounce the light across surfaces n number of times
 	// reduce the intensity of light by a multiplier per bounce
 	int bounces = 2;
 	for (int i = 0; i < bounces; i++)
 	{
+		seed += i;
+		
 		Renderer::HitPayload payload = TraceRay(ray);
 		if (payload.HitDistance < 0)
 		{
 			glm::vec3 skyColor = glm::vec3(0.6f, 0.7f, 0.9f);
-			color += skyColor * multiplier;
+			// light += skyColor * contribution;
 			break;
 		}
 
-		// add shading on the surface as per the angle of the light source
-		glm::vec3 lightDir(-1.0f, -1.0f, -1.0f);
-		lightDir = glm::normalize(lightDir);
-		float lightMult = glm::max(glm::dot(payload.WorldNormal, -lightDir), 0.0f);
-
 		const Sphere& closestSphere = m_ActiveScene->Spheres[payload.ObjectIndex];
 		const Material& closestMaterial = m_ActiveScene->Materials[closestSphere.MaterialIndex];
-		glm::vec3 sphereCol = closestMaterial.Albedo;
-		sphereCol *= lightMult;
-		color += sphereCol * multiplier;
 
-		multiplier *= 0.5f;
+		contribution *= closestMaterial.Albedo;
+		light += closestMaterial.GetEmission();
 
 		// added a little bias of 0.0001 so that the reflection image
 		// on the sphere surface does not clip with the sphere itself
 		ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
-		ray.Direction = glm::reflect(ray.Direction, 
-			payload.WorldNormal + closestMaterial.Roughness * Walnut::Random::Vec3(-0.5f, 0.5f));
+		// ray.Direction = glm::reflect(ray.Direction, 
+		// 	payload.WorldNormal + closestMaterial.Roughness * Walnut::Random::Vec3(-0.5f, 0.5f));
+		if (m_Settings.SlowRandom)
+			ray.Direction = glm::normalize(payload.WorldNormal + Walnut::Random::InUnitSphere());
+		else
+			ray.Direction = glm::normalize(payload.WorldNormal + Utils::InUnitSphere(seed));
 	}
 
-	return glm::vec4(color, 1.0f);
+	return glm::vec4(light, 1.0f);
 }
 
 // run ClosestHit function if hit a sphere
