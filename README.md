@@ -23,18 +23,28 @@ This project is a basic raytracer implemented in C++. A raytracer is a rendering
 **Here are some renders from the current version of the engine:**
 
 First iteration of the renderer, capable of rendering multiple spheres at once:
-![v2_rendering_multi_spheres](https://github.com/NISH-Original/raytracing_test/assets/75113251/0ceddbc4-3303-43df-9001-8fa317d46e04 =100x)
+
+![v2_rendering_multi_spheres](https://github.com/NISH-Original/raytracing_test/assets/75113251/0ceddbc4-3303-43df-9001-8fa317d46e04)
+
 
 Basic reflections:
-![v3_basic_reflections](https://github.com/NISH-Original/raytracing_test/assets/75113251/f24043c6-caeb-4155-8e79-c5b984197a07 =100x)
+
+![v3_basic_reflections](https://github.com/NISH-Original/raytracing_test/assets/75113251/f24043c6-caeb-4155-8e79-c5b984197a07)
+
 
 Roughness without Path Tracing:
-![v4_basic_roughness](https://github.com/NISH-Original/raytracing_test/assets/75113251/f3da70fe-6f18-46e2-96c0-afe76068bde1 =100x)
+
+![v4_basic_roughness](https://github.com/NISH-Original/raytracing_test/assets/75113251/f3da70fe-6f18-46e2-96c0-afe76068bde1)
+
 
 Roughness with Path Tracing:
-![v5_denoising_path_tracing](https://github.com/NISH-Original/raytracing_test/assets/75113251/30eb9f76-b9c8-4925-9267-31c0bdc7819f =100x)
+
+![v5_denoising_path_tracing](https://github.com/NISH-Original/raytracing_test/assets/75113251/30eb9f76-b9c8-4925-9267-31c0bdc7819f)
+
 
 Emission and Diffuse:
-![emission](https://github.com/NISH-Original/raytracing_test/assets/75113251/4edb6fa1-3899-444f-ac81-9c20f86e22ce =100x)
 
-![emission_v2](https://github.com/NISH-Original/raytracing_test/assets/75113251/496693c7-893a-42e3-af40-8844bb7ddc4b =100x)
+![emission](https://github.com/NISH-Original/raytracing_test/assets/75113251/4edb6fa1-3899-444f-ac81-9c20f86e22ce)
+
+
+![emission_v2](https://github.com/NISH-Original/raytracing_test/assets/75113251/496693c7-893a-42e3-af40-8844bb7ddc4b)
