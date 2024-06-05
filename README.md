@@ -1,6 +1,40 @@
-# Walnut App Template
+# Basic Raytracer in C++
 
-This is a simple app template for [Walnut](https://github.com/TheCherno/Walnut) - unlike the example within the Walnut repository, this keeps Walnut as an external submodule and is much more sensible for actually building applications. See the [Walnut](https://github.com/TheCherno/Walnut) repository for more details.
+## Overview
 
-## Getting Started
-Once you've cloned, you can customize the `premake5.lua` and `WalnutApp/premake5.lua` files to your liking (eg. change the name from "WalnutApp" to something else).  Once you're happy, run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files. Your app is located in the `WalnutApp/` directory, which some basic example code to get you going in `WalnutApp/src/WalnutApp.cpp`. I recommend modifying that WalnutApp project to create your own application, as everything should be setup and ready to go.
+This project is a basic raytracer implemented in C++. A raytracer is a rendering algorithm that simulates the way light interacts with objects in a virtual scene to produce realistic images. By tracing the paths of rays of light as they travel through the scene, the raytracer can determine the color and intensity of the light that reaches the viewer from each point in the scene.
+
+## Features
+
+- **Ray-Sphere Intersection:** The raytracer can detect intersections between rays and spheres, which are used as the primary geometric objects in the scene.
+- **Phong Shading:** The project implements Phong shading to simulate the way light reflects off surfaces, providing a more realistic rendering of objects.
+- **Multiple Light Sources:** The raytracer supports multiple light sources using emission materials, allowing for complex lighting setups and more dynamic scenes.
+- **Basic Reflection:** The raytracer includes basic reflection calculations, enabling it to render reflective surfaces.
+- **Materials:** It also supports modifying the aspects of the material such as Albedo, Roughness, and Emission for a wider variety of renderable objects.
+- **Interactive Camera and UI:** The application also has an interactive camera to move around the scene and UI to modify the objects in the scene.
+
+## Future Plans
+
+- **Using the GPU:** Leveraging the Vulcan API to use the GPU for faster render times, because the CPU is not best optimised for raytracing applications.
+- **More Geometry:** Adding support for various other 3D objects such as Quadrilaterals.
+
+## Some Renders
+
+**Here are some renders from the current version of the engine:**
+
+First iteration of the renderer, capable of rendering multiple spheres at once:
+![v2_rendering_multi_spheres](https://github.com/NISH-Original/raytracing_test/assets/75113251/0ceddbc4-3303-43df-9001-8fa317d46e04)
+
+Basic reflections:
+![v3_basic_reflections](https://github.com/NISH-Original/raytracing_test/assets/75113251/f24043c6-caeb-4155-8e79-c5b984197a07)
+
+Roughness without Path Tracing:
+![v4_basic_roughness](https://github.com/NISH-Original/raytracing_test/assets/75113251/f3da70fe-6f18-46e2-96c0-afe76068bde1)
+
+Roughness with Path Tracing:
+![v5_denoising_path_tracing](https://github.com/NISH-Original/raytracing_test/assets/75113251/30eb9f76-b9c8-4925-9267-31c0bdc7819f)
+
+Emission and Diffuse:
+![emission](https://github.com/NISH-Original/raytracing_test/assets/75113251/4edb6fa1-3899-444f-ac81-9c20f86e22ce)
+
+![emission_v2](https://github.com/NISH-Original/raytracing_test/assets/75113251/496693c7-893a-42e3-af40-8844bb7ddc4b)
