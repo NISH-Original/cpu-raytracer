@@ -17,6 +17,7 @@ This project is a basic raytracer implemented in C++. A raytracer is a rendering
 
 - **Using the GPU:** Leveraging the Vulcan API to use the GPU for faster render times, because the CPU is not best optimised for raytracing applications.
 - **More Geometry:** Adding support for various other 3D objects such as Quadrilaterals.
+- **Advanced Lighting:** Implementing more advanced lighting phenomena such as refraction.
 
 ## Some Renders
 
