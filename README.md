@@ -1,4 +1,4 @@
-# Basic Raytracer in C++
+# CPU Based Raytracer in C++
 
 ## Overview
 
