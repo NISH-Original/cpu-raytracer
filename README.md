@@ -7,10 +7,10 @@ This project is a basic raytracer implemented in C++. A raytracer is a rendering
 ## Features
 
 - **Ray-Sphere Intersection:** The raytracer can detect intersections between rays and spheres, which are used as the primary geometric objects in the scene.
-- **Phong Shading:** The project implements Phong shading to simulate the way light reflects off surfaces, providing a more realistic rendering of objects.
-- **Multiple Light Sources:** The raytracer supports multiple light sources using emission materials, allowing for complex lighting setups and more dynamic scenes.
 - **Basic Reflection:** The raytracer includes basic reflection calculations, enabling it to render reflective surfaces.
+- **Phong Shading:** The project implements Phong shading to simulate the way light reflects off surfaces, providing a more realistic rendering of objects.
 - **Materials:** It also supports modifying the aspects of the material such as Albedo, Roughness, and Emission for a wider variety of renderable objects.
+- **Multiple Light Sources:** The raytracer supports multiple light sources using emission materials, allowing for complex lighting setups and more dynamic scenes.
 - **Interactive Camera and UI:** The application also has an interactive camera to move around the scene and UI to modify the objects in the scene.
 
 ## Future Plans
