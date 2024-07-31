@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a basic raytracer implemented in C++. A raytracer is a rendering algorithm that simulates the way light interacts with objects in a virtual scene to produce realistic images. By tracing the paths of rays of light as they travel through the scene, the raytracer can determine the color and intensity of the light that reaches the camera from each point in the scene.
+This project is a basic raytracer implemented in C++. A raytracer is a rendering algorithm that simulates the way light interacts with objects in a virtual scene to produce realistic images. By tracing the paths of rays of light as they travel through the scene, the raytracer can determine the color and intensity of the light that reaches the camera from each point in the scene. It is CPU-based and does not leverage any external graphics APIs (viz. OpenGL, Vulcan, etc), rather manually calculates and assigns values to the pixel buffer with math.
 
 ## Features
 
